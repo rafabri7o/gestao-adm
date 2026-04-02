@@ -8,7 +8,7 @@ const navItems = [
   { href: '/pagar', label: 'Contas a Pagar', icon: '💸' },
   { href: '/receber', label: 'Contas a Receber', icon: '💰' },
   { href: '/cadastrar', label: 'Cadastrar', icon: '➕' },
-  { href: '/tags', label: 'Tags', icon: '🏷️' },
+
 ]
 
 export default function Sidebar() {
