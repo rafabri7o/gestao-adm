@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/AppShell'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Gestão ADM — RB7',
@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.variable} font-sans antialiased bg-gray-50 min-h-screen`}>
+      <body className={`${inter.className} bg-gray-50 min-h-screen antialiased`}>
         <AppShell>{children}</AppShell>
       </body>
     </html>
