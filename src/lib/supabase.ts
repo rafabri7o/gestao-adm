@@ -19,7 +19,7 @@ export type Conta = {
   valor: number
   data_vencimento: string
   data_pagamento: string | null
-  status: 'pendente' | 'pago' | 'recebido' | 'cancelado'
+  status: 'pendente' | 'a_pagar' | 'pago' | 'recebido' | 'cancelado'
   empresa: 'RB7 Digital' | 'RB7 Incorporadora' | 'RB7 Participações' | 'Rafa Brito (Pessoal)'
   observacoes: string | null
   created_at: string
