@@ -19,6 +19,7 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
   const [empresa, setEmpresa] = useState<string>(EMPRESAS[0])
   const [tipo, setTipo] = useState<string>('pagar')
   const [observacoes, setObservacoes] = useState('')
+  const [recorrente, setRecorrente] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [saving, setSaving] = useState(false)
@@ -33,6 +34,7 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
       setEmpresa(conta.empresa)
       setTipo(conta.tipo)
       setObservacoes(conta.observacoes || '')
+      setRecorrente((conta as unknown as { recorrente?: boolean }).recorrente || false)
       setSelectedTags(conta.contas_tags?.map((ct) => ct.tag_id) || [])
     }
     loadTags()
@@ -56,6 +58,7 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
       empresa,
       tipo,
       observacoes: observacoes || null,
+      recorrente,
       updated_at: new Date().toISOString(),
     }
 
@@ -208,6 +211,18 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={recorrente}
+                onChange={(e) => setRecorrente(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">🔄 Conta Recorrente</span>
+            </label>
           </div>
 
           <div>

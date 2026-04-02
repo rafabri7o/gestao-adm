@@ -13,28 +13,23 @@ export default function StatsCards({ custos, vendas, entradas }: StatsCardsProps
   const margemCaixa = entradas > 0 ? ((entradas - custos) / entradas) * 100 : 0
 
   const cards = [
-    { icon: '💸', label: 'Custos do Mês', value: formatCurrency(custos) },
-    { icon: '💰', label: 'Vendas do Mês', value: formatCurrency(vendas) },
-    { icon: '🏦', label: 'Entradas no Caixa', value: formatCurrency(entradas) },
-    { icon: '📈', label: 'Margem (Vendas)', value: `${margemVendas.toFixed(1)}%` },
-    { icon: '📊', label: 'Margem (Caixa)', value: `${margemCaixa.toFixed(1)}%` },
+    { icon: '💸', label: 'Custos do Mês', value: formatCurrency(custos), color: 'text-red-600' },
+    { icon: '💰', label: 'Vendas do Mês', value: formatCurrency(vendas), color: 'text-gray-900' },
+    { icon: '🏦', label: 'Entradas no Caixa', value: formatCurrency(entradas), color: 'text-green-600' },
+    { icon: '📈', label: 'Margem (Vendas)', value: `${margemVendas.toFixed(1)}%`, color: margemVendas >= 0 ? 'text-green-600' : 'text-red-600' },
+    { icon: '📊', label: 'Margem (Caixa)', value: `${margemCaixa.toFixed(1)}%`, color: margemCaixa >= 0 ? 'text-green-600' : 'text-red-600' },
   ]
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
       {cards.map((card) => (
         <div
           key={card.label}
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            padding: '20px',
-            border: '1px solid #f3f4f6',
-          }}
+          className="bg-white rounded-2xl border border-gray-100 p-5 animate-fade-in"
         >
-          <div style={{ fontSize: '20px', marginBottom: '12px' }}>{card.icon}</div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>{card.value}</div>
-          <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>{card.label}</div>
+          <div className="text-xl mb-3">{card.icon}</div>
+          <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
+          <div className="text-xs text-gray-400 mt-1">{card.label}</div>
         </div>
       ))}
     </div>

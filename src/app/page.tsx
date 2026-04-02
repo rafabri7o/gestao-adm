@@ -66,7 +66,7 @@ export default function Dashboard() {
   const pendingPagar = contas.filter((c) => c.tipo === 'pagar' && c.status === 'pendente')
   const pendingReceber = contas.filter((c) => c.tipo === 'receber' && c.status === 'pendente')
 
-  const selectClass = 'px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 text-gray-600'
+  const selectClass = 'px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300 text-gray-600 bg-white'
 
   return (
     <div>
@@ -82,7 +82,7 @@ export default function Dashboard() {
         <input
           type="text"
           placeholder="Buscar conta..."
-          className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300"
+          className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300 bg-white"
         />
         <select value={month} onChange={(e) => setMonth(Number(e.target.value))} className={selectClass}>
           {MESES.map((m, i) => (
@@ -109,16 +109,16 @@ export default function Dashboard() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl p-12 text-center text-gray-400">
-          <div className="text-3xl mb-3 animate-pulse">⏳</div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
+          <div className="text-3xl mb-3 animate-pulse-subtle">⏳</div>
           Carregando...
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
           {/* Contas a Pagar */}
-          <div className="bg-white rounded-2xl border border-gray-100 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-gray-100">
             <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">💸 Contas a Pagar (Pendentes)</h2>
+              <h2 className="text-sm font-semibold text-gray-900">💸 Contas a Pagar Pendentes</h2>
             </div>
             {pendingPagar.length === 0 ? (
               <div className="p-8 text-center text-gray-400 text-sm">Nenhuma conta pendente</div>
@@ -133,8 +133,7 @@ export default function Dashboard() {
                         {c.contas_tags?.map((ct) => (
                           <span
                             key={ct.tag_id}
-                            className="text-xs px-2 py-0.5 rounded-full text-white"
-                            style={{ backgroundColor: ct.tags?.cor || '#6b7280' }}
+                            className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
                           >
                             {ct.tags?.nome}
                           </span>
@@ -149,9 +148,9 @@ export default function Dashboard() {
           </div>
 
           {/* Contas a Receber */}
-          <div className="bg-white rounded-2xl border border-gray-100 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-gray-100">
             <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">💰 Contas a Receber (Pendentes)</h2>
+              <h2 className="text-sm font-semibold text-gray-900">💰 Contas a Receber Pendentes</h2>
             </div>
             {pendingReceber.length === 0 ? (
               <div className="p-8 text-center text-gray-400 text-sm">Nenhuma conta pendente</div>
@@ -166,8 +165,7 @@ export default function Dashboard() {
                         {c.contas_tags?.map((ct) => (
                           <span
                             key={ct.tag_id}
-                            className="text-xs px-2 py-0.5 rounded-full text-white"
-                            style={{ backgroundColor: ct.tags?.cor || '#6b7280' }}
+                            className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
                           >
                             {ct.tags?.nome}
                           </span>

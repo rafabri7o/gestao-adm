@@ -15,50 +15,28 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside
-      style={{
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: '256px',
-        backgroundColor: '#ffffff',
-        borderRight: '1px solid #e5e7eb',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 50,
-      }}
-    >
+    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 flex flex-col z-50">
       {/* Logo */}
-      <div style={{ padding: '24px', borderBottom: '1px solid #f3f4f6' }}>
-        <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>Gestão ADM</h1>
-        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>Controle Financeiro</p>
+      <div className="px-6 py-6 border-b border-gray-100">
+        <h1 className="text-lg font-bold text-gray-900">Gestão ADM</h1>
+        <p className="text-xs text-gray-400 mt-1">Controle Financeiro</p>
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
               key={item.href}
               href={item.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 16px',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: 500,
-                textDecoration: 'none',
-                backgroundColor: isActive ? '#eff6ff' : 'transparent',
-                color: isActive ? '#1d4ed8' : '#6b7280',
-                border: isActive ? '1px solid #bfdbfe' : '1px solid transparent',
-                transition: 'all 0.15s ease',
-              }}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-brand-50 text-brand-700 border border-brand-200'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 border border-transparent'
+              }`}
             >
-              <span style={{ fontSize: '16px' }}>{item.icon}</span>
+              <span className="text-base">{item.icon}</span>
               {item.label}
             </Link>
           )
@@ -66,8 +44,8 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div style={{ padding: '16px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
-        <p style={{ fontSize: '11px', color: '#9ca3af' }}>© RB7 Digital</p>
+      <div className="px-4 py-4 border-t border-gray-100 text-center">
+        <p className="text-xs text-gray-400">© RB7 Digital</p>
       </div>
     </aside>
   )
