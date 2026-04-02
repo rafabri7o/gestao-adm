@@ -20,10 +20,10 @@ export function getMonthRange(year: number, month: number) {
 
 export function getStatusColor(status: string): string {
   switch (status) {
-    case 'pendente': return 'bg-yellow-100 text-yellow-800'
-    case 'a_pagar': return 'bg-orange-100 text-orange-800'
+    case 'pendente': return 'bg-orange-100 text-orange-800'
+    case 'a_pagar': return 'bg-red-100 text-red-800'
     case 'pago': case 'recebido': return 'bg-green-100 text-green-800'
-    case 'cancelado': return 'bg-red-100 text-red-800'
+    case 'cancelado': return 'bg-gray-100 text-gray-800'
     default: return 'bg-gray-100 text-gray-800'
   }
 }
