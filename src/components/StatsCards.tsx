@@ -17,53 +17,41 @@ export default function StatsCards({ custos, vendas, entradas }: StatsCardsProps
       icon: '💸',
       label: 'Custos do Mês',
       value: formatCurrency(custos),
-      color: 'border-red-400',
-      bg: 'bg-red-50',
     },
     {
       icon: '💰',
       label: 'Vendas do Mês',
       value: formatCurrency(vendas),
-      color: 'border-blue-400',
-      bg: 'bg-blue-50',
     },
     {
       icon: '🏦',
       label: 'Entradas no Caixa',
       value: formatCurrency(entradas),
-      color: 'border-green-400',
-      bg: 'bg-green-50',
     },
     {
       icon: '📈',
       label: 'Margem (Vendas)',
       value: `${margemVendas.toFixed(1)}%`,
-      color: 'border-purple-400',
-      bg: 'bg-purple-50',
     },
     {
       icon: '📊',
       label: 'Margem (Caixa)',
       value: `${margemCaixa.toFixed(1)}%`,
-      color: 'border-indigo-400',
-      bg: 'bg-indigo-50',
     },
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-5 gap-6 mb-8">
       {cards.map((card) => (
         <div
           key={card.label}
-          className={`${card.bg} bg-white rounded-2xl p-5 border-l-4 ${card.color} shadow-sm`}
+          className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
         >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">{card.icon}</span>
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {card.label}
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-2xl">{card.icon}</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+          <div className="text-3xl font-bold text-gray-900">{card.value}</div>
+          <div className="text-sm text-gray-500 mt-1">{card.label}</div>
         </div>
       ))}
     </div>

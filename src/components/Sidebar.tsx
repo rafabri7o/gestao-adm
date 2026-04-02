@@ -15,23 +15,25 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-[#1e40af] text-white flex flex-col z-50">
-      <div className="p-6 border-b border-blue-700">
-        <h1 className="text-xl font-bold tracking-tight">Gestão ADM</h1>
-        <p className="text-blue-200 text-sm mt-1">Controle Financeiro</p>
+    <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col z-50">
+      {/* Logo */}
+      <div className="p-6">
+        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Gestão ADM</h1>
+        <p className="text-gray-400 text-xs mt-1">Controle Financeiro</p>
       </div>
 
-      <nav className="flex-1 py-4">
+      {/* Nav */}
+      <nav className="flex-1 px-4 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-blue-800 text-white border-r-4 border-white'
-                  : 'text-blue-100 hover:bg-blue-700 hover:text-white'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
               <span className="text-lg">{item.icon}</span>
@@ -41,8 +43,9 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-6 border-t border-blue-700">
-        <p className="text-blue-200 text-xs">© RB7 Digital</p>
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-100">
+        <p className="text-xs text-gray-400 text-center">© RB7 Digital</p>
       </div>
     </aside>
   )
