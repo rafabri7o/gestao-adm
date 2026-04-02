@@ -94,7 +94,7 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
   if (!conta) return null
 
   const statusOptions = tipo === 'pagar'
-    ? ['pendente', 'pago', 'cancelado']
+    ? ['pendente', 'a_pagar', 'pago', 'cancelado']
     : ['pendente', 'recebido', 'cancelado']
 
   return (

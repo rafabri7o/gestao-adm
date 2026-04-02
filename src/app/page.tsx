@@ -63,7 +63,7 @@ export default function Dashboard() {
     .filter((c) => c.tipo === 'receber' && c.status === 'recebido')
     .reduce((sum, c) => sum + Number(c.valor), 0)
 
-  const pendingPagar = contas.filter((c) => c.tipo === 'pagar' && c.status === 'pendente')
+  const pendingPagar = contas.filter((c) => c.tipo === 'pagar' && (c.status === 'pendente' || c.status === 'a_pagar'))
   const pendingReceber = contas.filter((c) => c.tipo === 'receber' && c.status === 'pendente')
 
   const selectClass = 'px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300 text-gray-600 bg-white'

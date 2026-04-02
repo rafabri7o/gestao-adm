@@ -80,7 +80,7 @@ export default function ContasPagar() {
   })
 
   function isUrgent(c: ContaWithTags) {
-    if (c.status !== 'pendente') return false
+    if (c.status !== 'pendente' && c.status !== 'a_pagar') return false
     const venc = new Date(c.data_vencimento)
     const hoje = new Date()
     const diff = (venc.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)
@@ -138,6 +138,7 @@ export default function ContasPagar() {
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={filterClass}>
             <option value="">Todos</option>
             <option value="pendente">Pendente</option>
+            <option value="a_pagar">A Pagar</option>
             <option value="pago">Pago</option>
             <option value="cancelado">Cancelado</option>
           </select>
