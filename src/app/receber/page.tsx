@@ -16,6 +16,19 @@ export default function ContasReceber() {
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
   const [editConta, setEditConta] = useState<ContaWithTags | null>(null)
+  const [sortBy, setSortBy] = useState('vencimento')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+  function handleSort(col: string) {
+    if (sortBy === col) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(col)
+      setSortDir('asc')
+    }
+  }
+
+  const sortIcon = (col: string) => sortBy === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -51,6 +64,24 @@ export default function ContasReceber() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  const sortedContas = [...contas].sort((a, b) => {
+    let cmp = 0
+    switch (sortBy) {
+      case 'vencimento': cmp = new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime(); break
+      case 'valor': cmp = Number(a.valor) - Number(b.valor); break
+      case 'nome': cmp = a.descricao.localeCompare(b.descricao); break
+      case 'empresa': cmp = a.empresa.localeCompare(b.empresa); break
+      case 'status': cmp = a.status.localeCompare(b.status); break
+      case 'tags': {
+        const aTag = a.contas_tags?.[0]?.tags?.nome || ''
+        const bTag = b.contas_tags?.[0]?.tags?.nome || ''
+        cmp = aTag.localeCompare(bTag); break
+      }
+      default: cmp = 0
+    }
+    return sortDir === 'asc' ? cmp : -cmp
+  })
 
   async function markAsRecebido(id: string) {
     await supabase.from('contas').update({
@@ -120,20 +151,20 @@ export default function ContasReceber() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Descrição</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Empresa</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase">Valor</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Vencimento</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Tags</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase">Ações</th>
+                  <th onClick={() => handleSort('nome')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-gray-600 select-none">Descrição{sortIcon('nome')}</th>
+                  <th onClick={() => handleSort('empresa')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-gray-600 select-none">Empresa{sortIcon('empresa')}</th>
+                  <th onClick={() => handleSort('valor')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-gray-600 select-none">Valor{sortIcon('valor')}</th>
+                  <th onClick={() => handleSort('vencimento')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-gray-600 select-none">Vencimento{sortIcon('vencimento')}</th>
+                  <th onClick={() => handleSort('status')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-gray-600 select-none">Status{sortIcon('status')}</th>
+                  <th onClick={() => handleSort('tags')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-gray-600 select-none">Tags{sortIcon('tags')}</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {contas.length === 0 ? (
                   <tr><td colSpan={7} className="text-center py-8 text-gray-400 text-sm">Nenhuma conta encontrada</td></tr>
                 ) : (
-                  contas.map((c) => (
+                  sortedContas.map((c) => (
                     <tr
                       key={c.id}
                       onClick={() => setEditConta(c)}

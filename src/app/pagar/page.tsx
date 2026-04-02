@@ -16,6 +16,19 @@ export default function ContasPagar() {
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
   const [editConta, setEditConta] = useState<ContaWithTags | null>(null)
+  const [sortBy, setSortBy] = useState('vencimento')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+  function handleSort(col: string) {
+    if (sortBy === col) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(col)
+      setSortDir('asc')
+    }
+  }
+
+  const sortIcon = (col: string) => sortBy === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -47,6 +60,35 @@ export default function ContasPagar() {
     if (tagsData) setTags(tagsData)
     setLoading(false)
   }, [month, year, empresa, statusFilter, tagFilter])
+
+  const sortedContas = [...contas].sort((a, b) => {
+    let cmp = 0
+    switch (sortBy) {
+      case 'vencimento': cmp = new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime(); break
+      case 'valor': cmp = Number(a.valor) - Number(b.valor); break
+      case 'nome': cmp = a.descricao.localeCompare(b.descricao); break
+      case 'empresa': cmp = a.empresa.localeCompare(b.empresa); break
+      case 'status': cmp = a.status.localeCompare(b.status); break
+      case 'tags': {
+        const aTag = a.contas_tags?.[0]?.tags?.nome || ''
+        const bTag = b.contas_tags?.[0]?.tags?.nome || ''
+        cmp = aTag.localeCompare(bTag); break
+      }
+      default: cmp = 0
+    }
+    return sortDir === 'asc' ? cmp : -cmp
+  })
+
+  function isUrgent(c: ContaWithTags) {
+    if (c.status !== 'pendente') return false
+    const venc = new Date(c.data_vencimento)
+    const hoje = new Date()
+    const diff = (venc.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)
+    if (diff > 5) return false
+    const hasTrabalhistas = c.contas_tags?.some((ct) => ct.tags?.nome === 'Despesas Trabalhistas')
+    const hasImposto = c.contas_tags?.some((ct) => ct.tags?.nome === 'Imposto')
+    return hasTrabalhistas || hasImposto
+  }
 
   useEffect(() => {
     loadData()
@@ -107,6 +149,7 @@ export default function ContasPagar() {
             {tags.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
           </select>
         </div>
+
       </div>
 
       {loading ? (
@@ -120,12 +163,12 @@ export default function ContasPagar() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Descrição</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Empresa</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Valor</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Vencimento</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Tags</th>
+                  <th onClick={() => handleSort('nome')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Descrição{sortIcon('nome')}</th>
+                  <th onClick={() => handleSort('empresa')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Empresa{sortIcon('empresa')}</th>
+                  <th onClick={() => handleSort('valor')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Valor{sortIcon('valor')}</th>
+                  <th onClick={() => handleSort('vencimento')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Vencimento{sortIcon('vencimento')}</th>
+                  <th onClick={() => handleSort('status')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Status{sortIcon('status')}</th>
+                  <th onClick={() => handleSort('tags')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Tags{sortIcon('tags')}</th>
                   <th className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Ações</th>
                 </tr>
               </thead>
@@ -133,13 +176,16 @@ export default function ContasPagar() {
                 {contas.length === 0 ? (
                   <tr><td colSpan={7} className="text-center py-12 text-gray-400 text-sm">Nenhuma conta encontrada</td></tr>
                 ) : (
-                  contas.map((c) => (
+                  sortedContas.map((c) => (
                     <tr
                       key={c.id}
                       onClick={() => setEditConta(c)}
                       className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors"
                     >
-                      <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{c.descricao}</td>
+                      <td className="px-5 py-3.5 text-sm font-medium text-gray-900">
+                        {isUrgent(c) && <span title="Vencimento próximo!" className="mr-1">🚨</span>}
+                        {c.descricao}
+                      </td>
                       <td className="px-5 py-3.5">
                         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getEmpresaColor(c.empresa)}`}>
                           {c.empresa}
