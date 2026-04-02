@@ -2,14 +2,22 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase, type ContaWithTags, type Tag } from '@/lib/supabase'
-import { formatCurrency, formatDate, getMonthRange, EMPRESAS, MESES } from '@/lib/utils'
+import { formatCurrency, formatDate, EMPRESAS } from '@/lib/utils'
 import StatsCards from '@/components/StatsCards'
+import DatePicker from '@/components/DatePicker'
+
+function fmt(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 export default function Dashboard() {
   const now = new Date()
-  const [day, setDay] = useState(0)
-  const [month, setMonth] = useState(now.getMonth() + 1)
-  const [year, setYear] = useState(now.getFullYear())
+  // Default: current month
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+  const [startDate, setStartDate] = useState(fmt(firstOfMonth))
+  const [endDate, setEndDate] = useState(fmt(lastOfMonth))
   const [empresa, setEmpresa] = useState('')
   const [tagFilter, setTagFilter] = useState('')
   const [contas, setContas] = useState<ContaWithTags[]>([])
@@ -18,14 +26,12 @@ export default function Dashboard() {
 
   const loadData = useCallback(async () => {
     setLoading(true)
-    const { start, end } = getMonthRange(year, month)
-    const filterDay = day > 0 ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : null
 
     let query = supabase
       .from('contas')
       .select('*, contas_tags(conta_id, tag_id, tags(*))')
-      .gte('data_vencimento', start)
-      .lte('data_vencimento', end)
+      .gte('data_vencimento', startDate)
+      .lte('data_vencimento', endDate)
       .order('data_vencimento')
 
     if (empresa) {
@@ -34,10 +40,6 @@ export default function Dashboard() {
 
     const { data } = await query
     let filtered = (data as ContaWithTags[]) || []
-
-    if (filterDay) {
-      filtered = filtered.filter((c) => c.data_vencimento === filterDay)
-    }
 
     if (tagFilter) {
       filtered = filtered.filter((c) =>
@@ -51,9 +53,7 @@ export default function Dashboard() {
     if (tagsData) setTags(tagsData)
 
     setLoading(false)
-  }, [day, month, year, empresa, tagFilter])
-
-  const daysInMonth = new Date(year, month, 0).getDate()
+  }, [startDate, endDate, empresa, tagFilter])
 
   useEffect(() => {
     loadData()
@@ -74,7 +74,7 @@ export default function Dashboard() {
   const pendingPagar = contas.filter((c) => c.tipo === 'pagar' && (c.status === 'pendente' || c.status === 'a_pagar'))
   const pendingReceber = contas.filter((c) => c.tipo === 'receber' && c.status === 'pendente')
 
-  const selectClass = 'px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300 text-gray-600 bg-white'
+  const selectClass = 'px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 text-gray-600 bg-white'
 
   return (
     <div>
@@ -87,27 +87,11 @@ export default function Dashboard() {
 
       {/* Filters */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex items-center gap-4 flex-wrap animate-fade-in">
-        <input
-          type="text"
-          placeholder="Buscar conta..."
-          className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300 bg-white"
+        <DatePicker
+          startDate={startDate}
+          endDate={endDate}
+          onChange={(s, e) => { setStartDate(s); setEndDate(e) }}
         />
-        <select value={day} onChange={(e) => setDay(Number(e.target.value))} className={selectClass}>
-          <option value={0}>Todos os dias</option>
-          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
-            <option key={d} value={d}>{String(d).padStart(2, '0')}</option>
-          ))}
-        </select>
-        <select value={month} onChange={(e) => setMonth(Number(e.target.value))} className={selectClass}>
-          {MESES.map((m, i) => (
-            <option key={i} value={i + 1}>{m}</option>
-          ))}
-        </select>
-        <select value={year} onChange={(e) => setYear(Number(e.target.value))} className={selectClass}>
-          {[2024, 2025, 2026, 2027].map((y) => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
         <select value={empresa} onChange={(e) => setEmpresa(e.target.value)} className={selectClass}>
           <option value="">Todas as empresas</option>
           {EMPRESAS.map((e) => (
@@ -123,16 +107,16 @@ export default function Dashboard() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-          <div className="text-3xl mb-3 animate-pulse-subtle">⏳</div>
+        <div className="bg-white rounded-2xl p-12 text-center text-gray-400">
+          <div className="text-3xl mb-3 animate-pulse">⏳</div>
           Carregando...
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Contas a Pagar */}
-          <div className="bg-white rounded-2xl border border-gray-100">
+          <div className="bg-white rounded-2xl border border-gray-100 animate-fade-in">
             <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">💸 Contas a Pagar Pendentes</h2>
+              <h2 className="text-sm font-semibold text-gray-900">💸 Contas a Pagar (Pendentes)</h2>
             </div>
             {pendingPagar.length === 0 ? (
               <div className="p-8 text-center text-gray-400 text-sm">Nenhuma conta pendente</div>
@@ -147,7 +131,8 @@ export default function Dashboard() {
                         {c.contas_tags?.map((ct) => (
                           <span
                             key={ct.tag_id}
-                            className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                            className="text-xs px-2 py-0.5 rounded-full text-white"
+                            style={{ backgroundColor: ct.tags?.cor || '#6b7280' }}
                           >
                             {ct.tags?.nome}
                           </span>
@@ -162,9 +147,9 @@ export default function Dashboard() {
           </div>
 
           {/* Contas a Receber */}
-          <div className="bg-white rounded-2xl border border-gray-100">
+          <div className="bg-white rounded-2xl border border-gray-100 animate-fade-in">
             <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">💰 Contas a Receber Pendentes</h2>
+              <h2 className="text-sm font-semibold text-gray-900">💰 Contas a Receber (Pendentes)</h2>
             </div>
             {pendingReceber.length === 0 ? (
               <div className="p-8 text-center text-gray-400 text-sm">Nenhuma conta pendente</div>
@@ -179,7 +164,8 @@ export default function Dashboard() {
                         {c.contas_tags?.map((ct) => (
                           <span
                             key={ct.tag_id}
-                            className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                            className="text-xs px-2 py-0.5 rounded-full text-white"
+                            style={{ backgroundColor: ct.tags?.cor || '#6b7280' }}
                           >
                             {ct.tags?.nome}
                           </span>
