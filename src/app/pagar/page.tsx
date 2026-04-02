@@ -165,14 +165,23 @@ export default function ContasPagar() {
                         </div>
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        {c.status === 'pendente' && (
+                        <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={(e) => { e.stopPropagation(); markAsPago(c.id) }}
-                            className="text-xs px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium transition-colors"
+                            onClick={(e) => { e.stopPropagation(); setEditConta(c) }}
+                            className="text-gray-400 hover:text-brand-600 transition-colors"
+                            title="Editar"
                           >
-                            Marcar Pago
+                            ✏️
                           </button>
-                        )}
+                          {c.status === 'pendente' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); markAsPago(c.id) }}
+                              className="text-xs px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium transition-colors"
+                            >
+                              Marcar Pago
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))

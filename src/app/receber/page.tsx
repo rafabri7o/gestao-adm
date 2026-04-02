@@ -166,14 +166,23 @@ export default function ContasReceber() {
                         </div>
                       </td>
                       <td className="px-5 py-3 text-right">
-                        {c.status === 'pendente' && (
+                        <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={(e) => { e.stopPropagation(); markAsRecebido(c.id) }}
-                            className="text-xs px-3 py-1.5 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg font-medium transition-colors"
+                            onClick={(e) => { e.stopPropagation(); setEditConta(c) }}
+                            className="text-gray-400 hover:text-brand-600 transition-colors"
+                            title="Editar"
                           >
-                            Marcar Recebido
+                            ✏️
                           </button>
-                        )}
+                          {c.status === 'pendente' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); markAsRecebido(c.id) }}
+                              className="text-xs px-3 py-1.5 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg font-medium transition-colors"
+                            >
+                              Marcar Recebido
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
