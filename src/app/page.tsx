@@ -7,6 +7,7 @@ import StatsCards from '@/components/StatsCards'
 
 export default function Dashboard() {
   const now = new Date()
+  const [day, setDay] = useState(0)
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [year, setYear] = useState(now.getFullYear())
   const [empresa, setEmpresa] = useState('')
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const loadData = useCallback(async () => {
     setLoading(true)
     const { start, end } = getMonthRange(year, month)
+    const filterDay = day > 0 ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : null
 
     let query = supabase
       .from('contas')
@@ -33,6 +35,10 @@ export default function Dashboard() {
     const { data } = await query
     let filtered = (data as ContaWithTags[]) || []
 
+    if (filterDay) {
+      filtered = filtered.filter((c) => c.data_vencimento === filterDay)
+    }
+
     if (tagFilter) {
       filtered = filtered.filter((c) =>
         c.contas_tags?.some((ct) => ct.tag_id === tagFilter)
@@ -45,7 +51,9 @@ export default function Dashboard() {
     if (tagsData) setTags(tagsData)
 
     setLoading(false)
-  }, [month, year, empresa, tagFilter])
+  }, [day, month, year, empresa, tagFilter])
+
+  const daysInMonth = new Date(year, month, 0).getDate()
 
   useEffect(() => {
     loadData()
@@ -84,6 +92,12 @@ export default function Dashboard() {
           placeholder="Buscar conta..."
           className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300 bg-white"
         />
+        <select value={day} onChange={(e) => setDay(Number(e.target.value))} className={selectClass}>
+          <option value={0}>Todos os dias</option>
+          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
+            <option key={d} value={d}>{String(d).padStart(2, '0')}</option>
+          ))}
+        </select>
         <select value={month} onChange={(e) => setMonth(Number(e.target.value))} className={selectClass}>
           {MESES.map((m, i) => (
             <option key={i} value={i + 1}>{m}</option>
