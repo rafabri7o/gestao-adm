@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase, type ContaWithTags, type Tag } from '@/lib/supabase'
-import { formatCurrency, formatDate, EMPRESAS } from '@/lib/utils'
+import { formatCurrency, formatDate, EMPRESAS, exportToCSV } from '@/lib/utils'
 import StatsCards from '@/components/StatsCards'
 import DatePicker from '@/components/DatePicker'
 
@@ -104,6 +104,14 @@ export default function Dashboard() {
             <option key={t.id} value={t.id}>{t.nome}</option>
           ))}
         </select>
+
+        <button
+          onClick={() => exportToCSV(contas, `dashboard-${startDate}-a-${endDate}`)}
+          disabled={contas.length === 0}
+          className="ml-auto border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <span>📥</span> Exportar CSV
+        </button>
       </div>
 
       {loading ? (

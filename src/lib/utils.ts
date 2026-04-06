@@ -60,3 +60,42 @@ export const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ] as const
+
+export function exportToCSV(
+  contas: Array<{
+    descricao: string
+    empresa: string
+    valor: number
+    data_vencimento: string
+    data_pagamento: string | null
+    status: string
+    tipo: string
+    contas_tags?: Array<{ tags?: { nome?: string } | null }> | null
+  }>,
+  filename: string
+) {
+  const header = 'Descrição;Empresa;Tipo;Valor;Vencimento;Pagamento;Status;Tags'
+  const rows = contas.map((c) => {
+    const tags = c.contas_tags?.map((ct) => ct.tags?.nome || '').filter(Boolean).join(', ') || ''
+    return [
+      c.descricao,
+      c.empresa,
+      c.tipo === 'pagar' ? 'Pagar' : 'Receber',
+      Number(c.valor).toFixed(2).replace('.', ','),
+      formatDate(c.data_vencimento),
+      c.data_pagamento ? formatDate(c.data_pagamento) : '',
+      getStatusLabel(c.status),
+      tags,
+    ].join(';')
+  })
+
+  const bom = '\uFEFF'
+  const csv = bom + [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${filename}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}

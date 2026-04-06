@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase, type ContaWithTags, type Tag } from '@/lib/supabase'
-import { formatCurrency, formatDate, getStatusColor, getStatusLabel, getEmpresaColor, getMonthRange, EMPRESAS, MESES } from '@/lib/utils'
+import { formatCurrency, formatDate, getStatusColor, getStatusLabel, getEmpresaColor, getMonthRange, EMPRESAS, MESES, exportToCSV } from '@/lib/utils'
 import EditContaModal from '@/components/EditContaModal'
 
 export default function ContasPagar() {
@@ -151,6 +151,13 @@ export default function ContasPagar() {
           </select>
         </div>
 
+        <button
+          onClick={() => exportToCSV(sortedContas, `contas-pagar-${MESES[month - 1]}-${year}`)}
+          disabled={contas.length === 0}
+          className="ml-auto border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <span>📥</span> Exportar CSV
+        </button>
       </div>
 
       {loading ? (
