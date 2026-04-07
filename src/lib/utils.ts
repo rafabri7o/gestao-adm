@@ -49,6 +49,10 @@ export function getEmpresaColor(empresa: string): string {
   }
 }
 
+export function calcContaTotal(c: { valor: number; acrescimo?: number | null; juros?: number | null; multa?: number | null; desconto?: number | null }): number {
+  return Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0)
+}
+
 export const EMPRESAS = [
   'RB7 Digital',
   'RB7 Incorporadora',

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase, type ContaWithTags, type Tag } from '@/lib/supabase'
-import { formatCurrency, formatDate, EMPRESAS, exportToCSV } from '@/lib/utils'
+import { formatCurrency, formatDate, EMPRESAS, exportToCSV, calcContaTotal } from '@/lib/utils'
 import StatsCards from '@/components/StatsCards'
 import DatePicker from '@/components/DatePicker'
 
@@ -61,15 +61,15 @@ export default function Dashboard() {
 
   const custos = contas
     .filter((c) => c.tipo === 'pagar' && c.status === 'pago')
-    .reduce((sum, c) => sum + Number(c.valor), 0)
+    .reduce((sum, c) => sum + calcContaTotal(c), 0)
 
   const vendas = contas
     .filter((c) => c.tipo === 'receber')
-    .reduce((sum, c) => sum + Number(c.valor), 0)
+    .reduce((sum, c) => sum + calcContaTotal(c), 0)
 
   const entradas = contas
     .filter((c) => c.tipo === 'receber' && c.status === 'recebido')
-    .reduce((sum, c) => sum + Number(c.valor), 0)
+    .reduce((sum, c) => sum + calcContaTotal(c), 0)
 
   const pendingPagar = contas.filter((c) => c.tipo === 'pagar' && (c.status === 'pendente' || c.status === 'a_pagar'))
   const pendingReceber = contas.filter((c) => c.tipo === 'receber' && c.status === 'pendente')
@@ -147,7 +147,7 @@ export default function Dashboard() {
                         ))}
                       </div>
                     </div>
-                    <span className="text-sm font-bold text-red-500">{formatCurrency(Number(c.valor))}</span>
+                    <span className="text-sm font-bold text-red-500">{formatCurrency(calcContaTotal(c))}</span>
                   </div>
                 ))}
               </div>
@@ -180,7 +180,7 @@ export default function Dashboard() {
                         ))}
                       </div>
                     </div>
-                    <span className="text-sm font-bold text-green-500">{formatCurrency(Number(c.valor))}</span>
+                    <span className="text-sm font-bold text-green-500">{formatCurrency(calcContaTotal(c))}</span>
                   </div>
                 ))}
               </div>

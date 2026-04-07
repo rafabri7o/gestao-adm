@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase, type ContaWithTags, type Tag } from '@/lib/supabase'
-import { formatCurrency, formatDate, getStatusColor, getStatusLabel, getEmpresaColor, getMonthRange, EMPRESAS, MESES, exportToCSV } from '@/lib/utils'
+import { formatCurrency, formatDate, getStatusColor, getStatusLabel, getEmpresaColor, getMonthRange, EMPRESAS, MESES, exportToCSV, calcContaTotal } from '@/lib/utils'
 import EditContaModal from '@/components/EditContaModal'
 
 export default function ContasPagar() {
@@ -83,9 +83,7 @@ export default function ContasPagar() {
       case 'multa': cmp = Number(a.multa || 0) - Number(b.multa || 0); break
       case 'desconto': cmp = Number(a.desconto || 0) - Number(b.desconto || 0); break
       case 'total': {
-        const totalA = Number(a.valor) + Number(a.acrescimo || 0) + Number(a.juros || 0) + Number(a.multa || 0) - Number(a.desconto || 0)
-        const totalB = Number(b.valor) + Number(b.acrescimo || 0) + Number(b.juros || 0) + Number(b.multa || 0) - Number(b.desconto || 0)
-        cmp = totalA - totalB; break
+        cmp = calcContaTotal(a) - calcContaTotal(b); break
       }
       case 'nome': cmp = a.descricao.localeCompare(b.descricao); break
       case 'empresa': cmp = a.empresa.localeCompare(b.empresa); break
@@ -196,18 +194,15 @@ export default function ContasPagar() {
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in">
           {(() => {
-            const calcTotal = (c: ContaWithTags) =>
-              Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0)
-
             const aPagar = contas
               .filter((c) => c.status === 'pendente' || c.status === 'a_pagar')
-              .reduce((sum, c) => sum + calcTotal(c), 0)
+              .reduce((sum, c) => sum + calcContaTotal(c), 0)
 
             const pago = contas
               .filter((c) => c.status === 'pago')
-              .reduce((sum, c) => sum + calcTotal(c), 0)
+              .reduce((sum, c) => sum + calcContaTotal(c), 0)
 
-            const total = contas.reduce((sum, c) => sum + calcTotal(c), 0)
+            const total = contas.reduce((sum, c) => sum + calcContaTotal(c), 0)
 
             return (
               <>
@@ -231,9 +226,6 @@ export default function ContasPagar() {
 
       {/* Pie Chart - Gastos por Tag */}
       {!loading && contas.length > 0 && (() => {
-        const calcTotal = (c: ContaWithTags) =>
-          Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0)
-
         const tagTotals: Record<string, { nome: string; cor: string; total: number }> = {}
         contas.forEach((c) => {
           if (c.contas_tags && c.contas_tags.length > 0) {
@@ -241,11 +233,11 @@ export default function ContasPagar() {
               const nome = ct.tags?.nome || 'Sem tag'
               const cor = ct.tags?.cor || '#9ca3af'
               if (!tagTotals[nome]) tagTotals[nome] = { nome, cor, total: 0 }
-              tagTotals[nome].total += calcTotal(c) / c.contas_tags.length
+              tagTotals[nome].total += calcContaTotal(c) / c.contas_tags.length
             })
           } else {
             if (!tagTotals['Sem tag']) tagTotals['Sem tag'] = { nome: 'Sem tag', cor: '#9ca3af', total: 0 }
-            tagTotals['Sem tag'].total += calcTotal(c)
+            tagTotals['Sem tag'].total += calcContaTotal(c)
           }
         })
 
@@ -354,7 +346,7 @@ export default function ContasPagar() {
                       <td className="px-5 py-3.5 text-sm text-right text-gray-500">{c.multa ? formatCurrency(Number(c.multa)) : '—'}</td>
                       <td className="px-5 py-3.5 text-sm text-right text-green-600">{c.desconto ? formatCurrency(Number(c.desconto)) : '—'}</td>
                       <td className="px-5 py-3.5 text-sm font-bold text-right text-gray-900">
-                        {formatCurrency(Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0))}
+                        {formatCurrency(calcContaTotal(c))}
                       </td>
                       <td className="px-5 py-3.5 text-sm text-gray-500">{formatDate(c.data_vencimento)}</td>
                       <td className="px-5 py-3.5">
