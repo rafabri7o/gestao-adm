@@ -229,6 +229,81 @@ export default function ContasPagar() {
         </div>
       )}
 
+      {/* Pie Chart - Gastos por Tag */}
+      {!loading && contas.length > 0 && (() => {
+        const calcTotal = (c: ContaWithTags) =>
+          Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0)
+
+        const tagTotals: Record<string, { nome: string; cor: string; total: number }> = {}
+        contas.forEach((c) => {
+          if (c.contas_tags && c.contas_tags.length > 0) {
+            c.contas_tags.forEach((ct) => {
+              const nome = ct.tags?.nome || 'Sem tag'
+              const cor = ct.tags?.cor || '#9ca3af'
+              if (!tagTotals[nome]) tagTotals[nome] = { nome, cor, total: 0 }
+              tagTotals[nome].total += calcTotal(c) / c.contas_tags.length
+            })
+          } else {
+            if (!tagTotals['Sem tag']) tagTotals['Sem tag'] = { nome: 'Sem tag', cor: '#9ca3af', total: 0 }
+            tagTotals['Sem tag'].total += calcTotal(c)
+          }
+        })
+
+        const entries = Object.values(tagTotals).sort((a, b) => b.total - a.total)
+        const grandTotal = entries.reduce((sum, e) => sum + e.total, 0)
+        if (grandTotal === 0) return null
+
+        // Build SVG pie slices
+        let cumAngle = 0
+        const slices = entries.map((entry) => {
+          const pct = entry.total / grandTotal
+          const startAngle = cumAngle
+          cumAngle += pct * 360
+          const endAngle = cumAngle
+          const startRad = ((startAngle - 90) * Math.PI) / 180
+          const endRad = ((endAngle - 90) * Math.PI) / 180
+          const largeArc = pct > 0.5 ? 1 : 0
+          const x1 = 100 + 80 * Math.cos(startRad)
+          const y1 = 100 + 80 * Math.sin(startRad)
+          const x2 = 100 + 80 * Math.cos(endRad)
+          const y2 = 100 + 80 * Math.sin(endRad)
+
+          if (pct >= 0.999) {
+            return { ...entry, pct, path: null }
+          }
+
+          const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`
+          return { ...entry, pct, path }
+        })
+
+        return (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 animate-fade-in">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">Gastos por Tag</h3>
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <svg viewBox="0 0 200 200" className="w-48 h-48 flex-shrink-0">
+                {slices.map((s, i) =>
+                  s.path ? (
+                    <path key={i} d={s.path} fill={s.cor} stroke="white" strokeWidth="2" />
+                  ) : (
+                    <circle key={i} cx="100" cy="100" r="80" fill={s.cor} />
+                  )
+                )}
+              </svg>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {slices.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: s.cor }} />
+                    <span className="text-sm text-gray-700">{s.nome}</span>
+                    <span className="text-sm font-semibold text-gray-900">{formatCurrency(s.total)}</span>
+                    <span className="text-xs text-gray-400">({(s.pct * 100).toFixed(1)}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {loading ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
           <div className="text-3xl mb-3 animate-pulse-subtle">⏳</div>
