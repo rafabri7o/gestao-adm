@@ -66,6 +66,15 @@ export default function ContasPagar() {
     switch (sortBy) {
       case 'vencimento': cmp = new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime(); break
       case 'valor': cmp = Number(a.valor) - Number(b.valor); break
+      case 'acrescimo': cmp = Number(a.acrescimo || 0) - Number(b.acrescimo || 0); break
+      case 'juros': cmp = Number(a.juros || 0) - Number(b.juros || 0); break
+      case 'multa': cmp = Number(a.multa || 0) - Number(b.multa || 0); break
+      case 'desconto': cmp = Number(a.desconto || 0) - Number(b.desconto || 0); break
+      case 'total': {
+        const totalA = Number(a.valor) + Number(a.acrescimo || 0) + Number(a.juros || 0) + Number(a.multa || 0) - Number(a.desconto || 0)
+        const totalB = Number(b.valor) + Number(b.acrescimo || 0) + Number(b.juros || 0) + Number(b.multa || 0) - Number(b.desconto || 0)
+        cmp = totalA - totalB; break
+      }
       case 'nome': cmp = a.descricao.localeCompare(b.descricao); break
       case 'empresa': cmp = a.empresa.localeCompare(b.empresa); break
       case 'status': cmp = a.status.localeCompare(b.status); break
@@ -174,6 +183,11 @@ export default function ContasPagar() {
                   <th onClick={() => handleSort('nome')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Descrição{sortIcon('nome')}</th>
                   <th onClick={() => handleSort('empresa')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Empresa{sortIcon('empresa')}</th>
                   <th onClick={() => handleSort('valor')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Valor{sortIcon('valor')}</th>
+                  <th onClick={() => handleSort('acrescimo')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Acréscimo{sortIcon('acrescimo')}</th>
+                  <th onClick={() => handleSort('juros')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Juros{sortIcon('juros')}</th>
+                  <th onClick={() => handleSort('multa')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Multa{sortIcon('multa')}</th>
+                  <th onClick={() => handleSort('desconto')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Descontos{sortIcon('desconto')}</th>
+                  <th onClick={() => handleSort('total')} className="text-right px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Total{sortIcon('total')}</th>
                   <th onClick={() => handleSort('vencimento')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Vencimento{sortIcon('vencimento')}</th>
                   <th onClick={() => handleSort('status')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Status{sortIcon('status')}</th>
                   <th onClick={() => handleSort('tags')} className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-600 select-none">Tags{sortIcon('tags')}</th>
@@ -182,7 +196,7 @@ export default function ContasPagar() {
               </thead>
               <tbody>
                 {contas.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-12 text-gray-400 text-sm">Nenhuma conta encontrada</td></tr>
+                  <tr><td colSpan={12} className="text-center py-12 text-gray-400 text-sm">Nenhuma conta encontrada</td></tr>
                 ) : (
                   sortedContas.map((c) => (
                     <tr
@@ -200,6 +214,13 @@ export default function ContasPagar() {
                         </span>
                       </td>
                       <td className="px-5 py-3.5 text-sm font-bold text-right text-gray-900">{formatCurrency(Number(c.valor))}</td>
+                      <td className="px-5 py-3.5 text-sm text-right text-gray-500">{c.acrescimo ? formatCurrency(Number(c.acrescimo)) : '—'}</td>
+                      <td className="px-5 py-3.5 text-sm text-right text-gray-500">{c.juros ? formatCurrency(Number(c.juros)) : '—'}</td>
+                      <td className="px-5 py-3.5 text-sm text-right text-gray-500">{c.multa ? formatCurrency(Number(c.multa)) : '—'}</td>
+                      <td className="px-5 py-3.5 text-sm text-right text-green-600">{c.desconto ? formatCurrency(Number(c.desconto)) : '—'}</td>
+                      <td className="px-5 py-3.5 text-sm font-bold text-right text-gray-900">
+                        {formatCurrency(Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0))}
+                      </td>
                       <td className="px-5 py-3.5 text-sm text-gray-500">{formatDate(c.data_vencimento)}</td>
                       <td className="px-5 py-3.5">
                         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusColor(c.status)}`}>

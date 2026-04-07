@@ -18,6 +18,10 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
   const [status, setStatus] = useState<string>('pendente')
   const [empresa, setEmpresa] = useState<string>(EMPRESAS[0])
   const [tipo, setTipo] = useState<string>('pagar')
+  const [acrescimo, setAcrescimo] = useState('')
+  const [juros, setJuros] = useState('')
+  const [multa, setMulta] = useState('')
+  const [desconto, setDesconto] = useState('')
   const [observacoes, setObservacoes] = useState('')
   const [recorrente, setRecorrente] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -33,6 +37,10 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
       setStatus(conta.status)
       setEmpresa(conta.empresa)
       setTipo(conta.tipo)
+      setAcrescimo(conta.acrescimo ? String(conta.acrescimo) : '')
+      setJuros(conta.juros ? String(conta.juros) : '')
+      setMulta(conta.multa ? String(conta.multa) : '')
+      setDesconto(conta.desconto ? String(conta.desconto) : '')
       setObservacoes(conta.observacoes || '')
       setRecorrente((conta as unknown as { recorrente?: boolean }).recorrente || false)
       setSelectedTags(conta.contas_tags?.map((ct) => ct.tag_id) || [])
@@ -52,6 +60,10 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
     const updates = {
       descricao,
       valor: parseFloat(valor),
+      acrescimo: acrescimo ? parseFloat(acrescimo) : null,
+      juros: juros ? parseFloat(juros) : null,
+      multa: multa ? parseFloat(multa) : null,
+      desconto: desconto ? parseFloat(desconto) : null,
       data_vencimento: dataVencimento,
       data_pagamento: dataPagamento || null,
       status,
@@ -152,6 +164,56 @@ export default function EditContaModal({ conta, onClose, onSaved }: EditContaMod
                   <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Acréscimo (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={acrescimo}
+                onChange={(e) => setAcrescimo(e.target.value)}
+                placeholder="0,00"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Juros (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={juros}
+                onChange={(e) => setJuros(e.target.value)}
+                placeholder="0,00"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Multa (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={multa}
+                onChange={(e) => setMulta(e.target.value)}
+                placeholder="0,00"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descontos (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={desconto}
+                onChange={(e) => setDesconto(e.target.value)}
+                placeholder="0,00"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
             </div>
           </div>
 
