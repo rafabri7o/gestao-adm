@@ -71,6 +71,14 @@ export default function Dashboard() {
     .filter((c) => c.tipo === 'receber' && c.status === 'recebido')
     .reduce((sum, c) => sum + calcContaTotal(c), 0)
 
+  const totalPagar = contas
+    .filter((c) => c.tipo === 'pagar')
+    .reduce((sum, c) => sum + calcContaTotal(c), 0)
+
+  const totalReceber = contas
+    .filter((c) => c.tipo === 'receber')
+    .reduce((sum, c) => sum + calcContaTotal(c), 0)
+
   const pendingPagar = contas.filter((c) => c.tipo === 'pagar' && (c.status === 'pendente' || c.status === 'a_pagar'))
   const pendingReceber = contas.filter((c) => c.tipo === 'receber' && c.status === 'pendente')
 
@@ -113,6 +121,26 @@ export default function Dashboard() {
           <span>📥</span> Exportar CSV
         </button>
       </div>
+
+      {/* Totals for filtered period */}
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Total a Pagar (Período)</p>
+            <p className="text-2xl font-bold text-red-600">{formatCurrency(totalPagar)}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Total a Receber (Período)</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(totalReceber)}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Saldo do Período</p>
+            <p className={`text-2xl font-bold ${totalReceber - totalPagar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(totalReceber - totalPagar)}
+            </p>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white rounded-2xl p-12 text-center text-gray-400">
