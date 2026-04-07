@@ -12,6 +12,7 @@ export default function ContasPagar() {
   const [empresa, setEmpresa] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [tagFilter, setTagFilter] = useState('')
+  const [busca, setBusca] = useState('')
   const [contas, setContas] = useState<ContaWithTags[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,7 +62,18 @@ export default function ContasPagar() {
     setLoading(false)
   }, [month, year, empresa, statusFilter, tagFilter])
 
-  const sortedContas = [...contas].sort((a, b) => {
+  const filteredContas = contas.filter((c) => {
+    if (!busca) return true
+    const termo = busca.toLowerCase()
+    return (
+      c.descricao.toLowerCase().includes(termo) ||
+      c.empresa.toLowerCase().includes(termo) ||
+      c.observacoes?.toLowerCase().includes(termo) ||
+      c.contas_tags?.some((ct) => ct.tags?.nome.toLowerCase().includes(termo))
+    )
+  })
+
+  const sortedContas = [...filteredContas].sort((a, b) => {
     let cmp = 0
     switch (sortBy) {
       case 'vencimento': cmp = new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime(); break
@@ -160,14 +172,62 @@ export default function ContasPagar() {
           </select>
         </div>
 
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-1">Buscar</label>
+          <input
+            type="text"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Descrição, empresa, tag..."
+            className={`${filterClass} min-w-[200px]`}
+          />
+        </div>
+
         <button
           onClick={() => exportToCSV(sortedContas, `contas-pagar-${MESES[month - 1]}-${year}`)}
-          disabled={contas.length === 0}
+          disabled={filteredContas.length === 0}
           className="ml-auto border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <span>📥</span> Exportar CSV
         </button>
       </div>
+
+      {/* Summary Boxes */}
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in">
+          {(() => {
+            const calcTotal = (c: ContaWithTags) =>
+              Number(c.valor) + Number(c.acrescimo || 0) + Number(c.juros || 0) + Number(c.multa || 0) - Number(c.desconto || 0)
+
+            const aPagar = contas
+              .filter((c) => c.status === 'pendente' || c.status === 'a_pagar')
+              .reduce((sum, c) => sum + calcTotal(c), 0)
+
+            const pago = contas
+              .filter((c) => c.status === 'pago')
+              .reduce((sum, c) => sum + calcTotal(c), 0)
+
+            const total = contas.reduce((sum, c) => sum + calcTotal(c), 0)
+
+            return (
+              <>
+                <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">A Pagar</p>
+                  <p className="text-2xl font-bold text-red-600">{formatCurrency(aPagar)}</p>
+                </div>
+                <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Pago</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(pago)}</p>
+                </div>
+                <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Total do Mês</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(total)}</p>
+                </div>
+              </>
+            )
+          })()}
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
@@ -195,7 +255,7 @@ export default function ContasPagar() {
                 </tr>
               </thead>
               <tbody>
-                {contas.length === 0 ? (
+                {filteredContas.length === 0 ? (
                   <tr><td colSpan={12} className="text-center py-12 text-gray-400 text-sm">Nenhuma conta encontrada</td></tr>
                 ) : (
                   sortedContas.map((c) => (
